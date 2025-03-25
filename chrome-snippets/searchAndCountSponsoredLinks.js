@@ -2,7 +2,6 @@ const maxTabs = 2; // Limit number of tabs to open at once
 let currentTabIndex = 0; // Keeps track of the current tab being processed
 let openTabs = [];
 let queriesArray = [];
-let isBlockedByCaptcha = false;
 let results = [];
 
 // Function to open a new tab, perform a search, and count sponsored links
@@ -18,7 +17,7 @@ function openSearchAndCountSponsoredLinks(query) {
       if (newTab.document.readyState === 'complete') {
         clearInterval(interval); // Stop checking the tab once it's fully loaded
         const isRecaptchaDetected = detectRecaptchaV2(newTab)
-        if (isBlockedByCaptcha || isRecaptchaDetected) {
+        if (isRecaptchaDetected) {
           console.log("recaptcha detected on query, skipping it: ", query)
           return;
         }
@@ -85,15 +84,9 @@ function detectRecaptchaV2(tab) {
 function getSearchQueriesFromUser() {
   // Ask the user to input search queries, separated by newlines
   let userInput = prompt('Enter your search queries, each on a new line:\n(Press Cancel when done)');
-  let iAmBlockedByCaptcha = prompt('Are you blocked by recaptcha my baby ? (y/n)');
 
   // Check if the user has input any data
   if (userInput) {
-    // check if you are blocked by recaptcha, if yes then it will open a search aand let you do the recaptcha
-    if (iAmBlockedByCaptcha) {
-      isBlockedByCaptcha = (iAmBlockedByCaptcha.toLowerCase() === 'y' || iAmBlockedByCaptcha.toLowerCase() === 'yes');
-    }
-
     // Split the input string by newlines and return the result as an array
     smartSearchAndCount(userInput);
 
