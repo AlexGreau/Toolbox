@@ -12,33 +12,33 @@ function openSearchAndCountSponsoredLinks(query) {
   let newTab = window.open(searchUrl, '_blank');
 
   // Monitor when the tab has finished loading and execute the sponsored link counting
-  const interval = setInterval(function() {
+  const interval = setInterval(function () {
     try {
-            // If the tab is fully loaded, process the sponsored links
-    if (newTab.document.readyState === 'complete') {
+      // If the tab is fully loaded, process the sponsored links
+      if (newTab.document.readyState === 'complete') {
         clearInterval(interval); // Stop checking the tab once it's fully loaded
         const isRecaptchaDetected = detectRecaptchaV2(newTab)
         if (isBlockedByCaptcha || isRecaptchaDetected) {
           console.log("recaptcha detected on query, skipping it: ", query)
           return;
         }
-  
+
         // Count the sponsored links
         let sponsoredSpans = newTab.document.querySelectorAll('span');
         let sponsoredLinks = Array.from(sponsoredSpans).filter(span => span.innerText.includes('Sponsored'));
-  
+
         // Output the number of sponsored links for the current query
         console.log(`Number of sponsored links for query "${query}":`, sponsoredLinks.length);
         results.push(
           `${query}, ${sponsoredLinks.length}, ${isRecaptchaDetected}`
         );
-  
+
         // Close the tab after processing
         newTab.close();
-  
+
         // Move to the next tab processing if there are still queries left
         currentTabIndex++;
-  
+
         // Open the next set of tabs if needed
         if (currentTabIndex < queriesArray.length) {
           if (openTabs.length < maxTabs) {
@@ -50,8 +50,8 @@ function openSearchAndCountSponsoredLinks(query) {
         }
       }
     } catch (e) {
-        console.error(e);
-        clearInterval(interval);
+      console.error(e);
+      clearInterval(interval);
     }
 
   }, 500); // Check every 500ms if the tab is loaded
@@ -86,17 +86,17 @@ function getSearchQueriesFromUser() {
   // Ask the user to input search queries, separated by newlines
   let userInput = prompt('Enter your search queries, each on a new line:\n(Press Cancel when done)');
   let iAmBlockedByCaptcha = prompt('Are you blocked by recaptcha my baby ? (y/n)');
-  
+
   // Check if the user has input any data
   if (userInput) {
     // check if you are blocked by recaptcha, if yes then it will open a search aand let you do the recaptcha
     if (iAmBlockedByCaptcha) {
       isBlockedByCaptcha = (iAmBlockedByCaptcha.toLowerCase() === 'y' || iAmBlockedByCaptcha.toLowerCase() === 'yes');
     }
-  
+
     // Split the input string by newlines and return the result as an array
     smartSearchAndCount(userInput);
-   
+
     return results;
   } else {
     return [];
