@@ -17,8 +17,9 @@ function openSearchAndCountSponsoredLinks(query) {
             // If the tab is fully loaded, process the sponsored links
     if (newTab.document.readyState === 'complete') {
         clearInterval(interval); // Stop checking the tab once it's fully loaded
-  
-        if (isBlockedByCaptcha || detectRecaptchaV2(newTab)) {
+        const isRecaptchaDetected = detectRecaptchaV2(newTab)
+        if (isBlockedByCaptcha || isRecaptchaDetected) {
+          console.log("recaptcha detected on query, skipping it: ", query)
           return;
         }
   
@@ -29,11 +30,7 @@ function openSearchAndCountSponsoredLinks(query) {
         // Output the number of sponsored links for the current query
         console.log(`Number of sponsored links for query "${query}":`, sponsoredLinks.length);
         results.push(
-          {
-            query: query,
-            sponsoredLinksDetected: sponsoredLinks.length,
-            hasFacedRecaptcha: detectRecaptcha(newTab),
-          }
+          `${query}, ${sponsoredLinks.length}, ${isRecaptchaDetected}`
         );
   
         // Close the tab after processing
@@ -80,7 +77,6 @@ function smartSearchAndCount(queries) {
 }
 
 function detectRecaptchaV2(tab) {
-  console.log("Has recaptcha :", tab.document.querySelectorAll('.g-recaptcha').length > 0);
   return tab.document.querySelectorAll('.g-recaptcha').length > 0;
 }
 
